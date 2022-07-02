@@ -1,6 +1,6 @@
 # DAF
 
-![Python](https://github.com/z0rr0/daf/workflows/Python/badge.svg)
+![Django CI](https://github.com/z0rr0/daf/workflows/Django%20CI/badge.svg)
 ![Version](https://img.shields.io/github/tag/z0rr0/daf.svg)
 ![License](https://img.shields.io/github/license/z0rr0/daf.svg)
 
