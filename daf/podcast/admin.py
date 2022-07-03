@@ -1,7 +1,6 @@
 from django.contrib import admin
-from django.utils.translation import gettext_lazy as _
 
-from .models import Podcast, Episode
+from .models import Episode, Podcast
 
 
 class PodcastAdmin(admin.ModelAdmin):
