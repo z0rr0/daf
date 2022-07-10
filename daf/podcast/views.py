@@ -3,14 +3,9 @@ from typing import Iterable, List
 
 from django.conf import settings
 from django.contrib.syndication.views import Feed
-from django.http import HttpResponse
 from django.utils.feedgenerator import Enclosure, Rss201rev2Feed
 
 from .models import Episode, Podcast
-
-
-def index(request):
-    return HttpResponse('Django Audio Feed')
 
 
 class ITunesFeed(Rss201rev2Feed):
