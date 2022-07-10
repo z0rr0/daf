@@ -4,7 +4,8 @@ from .models import Episode, Podcast
 
 
 class PodcastAdmin(admin.ModelAdmin):
-    list_display = ['title', 'link', 'image', 'description', 'created']
+    list_display = ['title', 'link', 'feed', 'image', 'description', 'created']
+    prepopulated_fields = {'slug': ('title',)}
     search_fields = ('title', 'description')
     list_filter = ['created']
 
