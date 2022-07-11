@@ -8,6 +8,7 @@ PID=/tmp/.$(NAME).pid
 all: test
 
 test:
+	@mkdir -p daf/static
 	python $(MANAGE) test podcast
 
 start:
