@@ -39,13 +39,6 @@ python manage.py collectstatic --no-input
 curl -X GET http://localhost:8084
 ```
 
-You can also login inside the container and connect to the database with:
-
-```sh
-docker exec -it daf /bin/sh
-sqlite3 /data/conf/db.sqlite3
-```
-
 ## License
 
 This source code is governed by a MIT license that can be found
