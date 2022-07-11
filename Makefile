@@ -8,7 +8,7 @@ PID=/tmp/.$(NAME).pid
 all: test
 
 test:
-	python $(MANAGE) test
+	python $(MANAGE) test podcast
 
 start:
 	@echo "  >  $(NAME)"
