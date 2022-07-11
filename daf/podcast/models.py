@@ -12,6 +12,7 @@ from django.utils.translation import gettext_lazy as _
 # ----------- additional ----------------
 @dataclass(frozen=True)
 class FeedRequest:
+    """Class to generate absolute URLs for the feed's items."""
     domain: str
     secure: bool
 
@@ -49,6 +50,7 @@ class PodcastBaseModel(CreatedUpdatedModel):
 
 
 class Podcast(PodcastBaseModel):
+    """Podcast objects. Every item results to a single RSS feed."""
     slug = models.SlugField(_('slug'), max_length=255, unique=True)
     link = models.URLField(_('link'), max_length=255, default='', blank=True)
     subtitle = models.CharField(
@@ -90,6 +92,7 @@ def podcast_directory_path(episode: 'Episode', filename: str) -> str:
 
 
 class Episode(PodcastBaseModel):
+    """Podcasts' episodes."""
     podcast = models.ForeignKey(Podcast, on_delete=models.CASCADE)
     audio = models.FileField(
         _('audio'), upload_to=podcast_directory_path, blank=True,

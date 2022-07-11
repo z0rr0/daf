@@ -9,6 +9,8 @@ from .models import Episode, Podcast
 
 
 class ITunesFeed(Rss201rev2Feed):
+    """Extension to the RSS v2 feed class to add iTunes specific elements."""
+
     def root_attributes(self):
         attrs = super().root_attributes()
         attrs['xmlns:itunes'] = 'http://www.itunes.com/dtds/podcast-1.0.dtd'
@@ -31,6 +33,7 @@ class ITunesFeed(Rss201rev2Feed):
 
 
 class EpisodesFeed(Feed):
+    """Main feed generator class."""
     feed_type = ITunesFeed
     language = settings.LANGUAGE_CODE
 
