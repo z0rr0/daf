@@ -21,15 +21,18 @@ class ITunesFeed(Rss201rev2Feed):
         handler.addQuickElement('itunes:author', self.feed['author_name'])
         handler.addQuickElement('itunes:subtitle', self.feed['subtitle'])
         handler.addQuickElement('itunes:summary', self.feed['description'])
-        handler.addQuickElement('itunes:image', self.feed['image'])
         handler.addQuickElement('itunes:keywords', self.feed['keywords'])
         handler.addQuickElement('itunes:explicit', 'no')
+        handler.addQuickElement(
+            'itunes:image',
+            attrs={'href': self.feed['image']},
+        )
 
     def add_item_elements(self, handler, item):
         super().add_item_elements(handler, item)
         handler.addQuickElement('itunes:author', item['author_name'])
         handler.addQuickElement('itunes:summary', item['description'])
-        handler.addQuickElement('itunes:image', item['image'])
+        handler.addQuickElement('itunes:image', attrs={'href': item['image']})
 
 
 class EpisodesFeed(Feed):

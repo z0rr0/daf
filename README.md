@@ -15,10 +15,6 @@ cp db.sqlite3 db.sqlite3.bak
 python manage.py flush --no-input
 python manage.py createsuperuser
 ```
-3. Collect static files
-```shell
-python manage.py collectstatic --no-input
-```
 2. Build docker container
 ```sh
 docker build -t daf . 
@@ -33,14 +29,17 @@ conf/db.sqlite3
 ```sh
 docker run -d --name daf -p 8084:8084 --volume $PWD/conf:/data/conf --volume $PWD/media:/var/daf/media --restart always daf
 ```
-
-You can check the status of the container with CURL:
-
+5. Collect static files
+```sh
+docker exec -it daf /bin/sh
+python manage.py collectstatic --no-input
+```
+6. Check HTTP response:
 ```sh
 curl -X GET http://localhost:8084
 ```
 
-You can login inside the container and connect to the database with:
+You can also login inside the container and connect to the database with:
 
 ```sh
 docker exec -it daf /bin/sh

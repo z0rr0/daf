@@ -10,12 +10,12 @@ RUN apk add tzdata ca-certificates python3 uwsgi-python3 py3-pip sqlite
 # base app dir
 ADD daf /var/daf
 # clean local files
-RUN rm -rf /var/daf/media /var/daf/daf/local_settings.py /var/daf/db.sqlite3*
+RUN rm -rf /var/daf/media /var/daf/static /var/daf/daf/local_settings.py /var/daf/db.sqlite3*
 
 ADD requirements.txt /tmp/requirements.txt
 RUN pip3 install -r /tmp/requirements.txt
 
-VOLUME ["/data/conf", "/var/daf/media"]
+VOLUME ["/data/conf", "/var/daf/media", "/var/daf/static"]
 RUN ln -s /data/conf/local_settings.py /var/daf/daf/local_settings.py
 # set properly db path in local_settings.py
 # 'NAME': '/var/conf/db.sqlite3',

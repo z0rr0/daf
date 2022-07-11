@@ -76,9 +76,9 @@ class FeedTestCase(TestCase):
             <itunes:author>{podcast.author}</itunes:author>
             <itunes:subtitle>{podcast.subtitle}</itunes:subtitle>
             <itunes:summary>{podcast.description}</itunes:summary>
-            <itunes:image>http://testserver{podcast.image.url}</itunes:image>
             <itunes:keywords>{podcast.keywords}</itunes:keywords>
-            <itunes:explicit>no</itunes:explicit>""")
+            <itunes:explicit>no</itunes:explicit>
+            <itunes:image href="http://testserver{podcast.image.url}"/>""")
 
         items = [
             f"""<item><title>{episode.title}</title>
@@ -92,7 +92,7 @@ class FeedTestCase(TestCase):
             \turl="http://testserver{episode.audio.url}"/>
             <itunes:author>{episode.author}</itunes:author>
             <itunes:summary>{episode.description}</itunes:summary>
-            <itunes:image>http://testserver{episode.image.url}</itunes:image>
+            <itunes:image href="http://testserver{episode.image.url}"/>
             </item>"""
             for episode in episodes
         ]
