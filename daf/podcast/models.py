@@ -6,7 +6,6 @@ from django.contrib.syndication.views import add_domain
 from django.db import models
 from django.urls import reverse_lazy
 from django.utils.html import format_html
-from django.utils.timezone import get_default_timezone
 from django.utils.translation import gettext_lazy as _
 
 
@@ -108,10 +107,5 @@ class Episode(PodcastBaseModel):
 
     @property
     def pub_date(self) -> str:
-        if not self.published:
-            return ''
-
         fmt = '%a, %d %b %Y %H:%M:%S %z'
-        tz = get_default_timezone()
-        value = self.published.replace(tzinfo=tz)
-        return value.strftime(fmt)
+        return self.published.strftime(fmt) if self.published else ''

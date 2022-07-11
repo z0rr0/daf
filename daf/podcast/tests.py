@@ -1,4 +1,5 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
+from django.utils import timezone
 
 from django.core.files.base import ContentFile
 from django.test import TestCase
@@ -26,7 +27,7 @@ class FeedTestCase(TestCase):
             )
             for i in range(2)
         ]
-        now = datetime.now()
+        now = timezone.now()
         self.episodes = {
             p.id: [
                 Episode.objects.create(
@@ -38,7 +39,7 @@ class FeedTestCase(TestCase):
                     image=ContentFile(b'file', name=f'episode image{j}.png'),
                     audio=ContentFile(b'audio', name=f'audio{j}.mp3'),
                 )
-                for j in range(4)
+                for j in range(10)
             ]
             for p in self.podcasts
         }
@@ -58,7 +59,7 @@ class FeedTestCase(TestCase):
             if episode.published is not None
         ]
         episodes.sort(key=lambda e: e.published, reverse=True)
-        self.assertEqual(len(episodes), 2)
+        self.assertEqual(len(episodes), 5)
 
         pub_date = episodes[0].pub_date
         expected = (f"""<?xml version="1.0" encoding="utf-8"?>
