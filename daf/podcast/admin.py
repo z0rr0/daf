@@ -14,7 +14,7 @@ class EpisodeAdmin(admin.ModelAdmin):
     list_display = ['title', 'audio', 'published', 'created']
     search_fields = ('title', 'description')
     list_select_related = ['podcast']
-    list_filter = ['created', 'podcast']
+    list_filter = ['created', 'podcast', 'published']
 
 
 admin.site.register(Podcast, PodcastAdmin)

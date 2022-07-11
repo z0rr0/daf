@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Iterable, List
+from typing import Any, Dict, Iterable, List
 
 from django.conf import settings
 from django.contrib.syndication.views import Feed
@@ -19,15 +19,15 @@ class ITunesFeed(Rss201rev2Feed):
         handler.addQuickElement('itunes:author', self.feed['author_name'])
         handler.addQuickElement('itunes:subtitle', self.feed['subtitle'])
         handler.addQuickElement('itunes:summary', self.feed['description'])
-        handler.addQuickElement('itunes:explicit', 'no')
-        # additional itunes fields
         handler.addQuickElement('itunes:image', self.feed['image'])
         handler.addQuickElement('itunes:keywords', self.feed['keywords'])
+        handler.addQuickElement('itunes:explicit', 'no')
 
     def add_item_elements(self, handler, item):
         super().add_item_elements(handler, item)
         handler.addQuickElement('itunes:author', item['author_name'])
         handler.addQuickElement('itunes:summary', item['description'])
+        handler.addQuickElement('itunes:image', item['image'])
 
 
 class EpisodesFeed(Feed):
@@ -63,7 +63,7 @@ class EpisodesFeed(Feed):
     def feed_copyright(self, obj: Podcast) -> str:
         return obj.copyright
 
-    def feed_extra_kwargs(self, obj: Podcast) -> dict:
+    def feed_extra_kwargs(self, obj: Podcast) -> Dict[str, Any]:
         return {
             'image': obj.image_url,
             'keywords': obj.keywords,
@@ -75,7 +75,11 @@ class EpisodesFeed(Feed):
         ).select_related('podcast').order_by('-published')
         for item in items:
             item.audio_url = obj.abs_url(item.audio.url)
+            item.image_url = obj.abs_url(item.image.url) if item.image else ''
         return items
+
+    def item_author_name(self, item: Episode) -> str:
+        return item.author or item.podcast.author
 
     def item_title(self, item: Episode) -> str:
         return item.title
@@ -99,10 +103,5 @@ class EpisodesFeed(Feed):
     def item_guid(self, item: Episode) -> str:
         return str(item.pk)
 
-    def item_author_name(self, item: Episode) -> str:
-        return item.podcast.author
-
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-    #     context['podcast'] = self.object
-    #     return context
+    def item_extra_kwargs(self, item: Episode) -> Dict[str, Any]:
+        return {'image': getattr(item, 'image_url', '')}
