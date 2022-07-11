@@ -6,11 +6,45 @@
 
 Django Audio Feed
 
-##  Translation
+## Deploy
 
+1. Prepare SQLite database
+```sh
+cd daf
+cp db.sqlite3 db.sqlite3.bak
+python manage.py flush --no-input
+python manage.py createsuperuser
 ```
-python manage.py makemessages -l ru
-python manage.py compilemessages -v2
+3. Collect static files
+```shell
+python manage.py collectstatic --no-input
+```
+2. Build docker container
+```sh
+docker build -t daf . 
+```
+3. Go to deploy host and prepare required files
+```sh
+conf/local_settings.py
+conf/uwsgi.ini
+conf/db.sqlite3
+```
+4. Run docker container
+```sh
+docker run -d --name daf -p 8084:8084 --volume $PWD/conf:/data/conf --volume $PWD/media:/var/daf/media --restart always daf
+```
+
+You can check the status of the container with CURL:
+
+```sh
+curl -X GET http://localhost:8084
+```
+
+You can login inside the container and connect to the database with:
+
+```sh
+docker exec -it daf /bin/sh
+sqlite3 /data/conf/db.sqlite3
 ```
 
 ## License

@@ -11,6 +11,9 @@ test:
 	@mkdir -p daf/static
 	python $(MANAGE) test podcast
 
+docker:
+	docker build -t $(NAME) .
+
 start:
 	@echo "  >  $(NAME)"
 	python $(MANAGE) runserver --noreload $(HOST):$(PORT) & echo $$! > $(PID)

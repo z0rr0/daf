@@ -130,4 +130,6 @@ dmypy.json
 
 # local
 media/
-feeds/
+static/
+*.sqlite3.bak
+
