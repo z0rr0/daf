@@ -37,8 +37,8 @@ class EpisodesFeed(Feed):
     feed_type = ITunesFeed
     language = settings.LANGUAGE_CODE
 
-    def get_object(self, request, podcast: str, *args, **kwargs) -> Podcast:
-        obj = Podcast.objects.get(slug=podcast)
+    def get_object(self, request, *args, **kwargs) -> Podcast:
+        obj = Podcast.objects.get(slug=kwargs.get('podcast'))
         obj.set_request(request)
         return obj
 

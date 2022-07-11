@@ -135,5 +135,6 @@ if 'test' not in sys.argv:
     # overwrite custom settings
     try:
         from .local_settings import *
+        print('\nloaded local settings\n')
     except ImportError:
         print('local settings ImportError', file=sys.stderr)

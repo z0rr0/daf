@@ -94,9 +94,7 @@ def podcast_directory_path(episode: 'Episode', filename: str) -> str:
 class Episode(PodcastBaseModel):
     """Podcasts' episodes."""
     podcast = models.ForeignKey(Podcast, on_delete=models.CASCADE)
-    audio = models.FileField(
-        _('audio'), upload_to=podcast_directory_path, blank=True,
-    )
+    audio = models.FileField(_('audio'), upload_to=podcast_directory_path)
     published = models.DateTimeField(
         _('published'), blank=True, null=True, db_index=True,
     )
