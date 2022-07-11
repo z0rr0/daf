@@ -11,7 +11,7 @@ from django.utils.translation import gettext_lazy as _
 
 # ----------- additional ----------------
 @dataclass(frozen=True)
-class FeedRequestURL:
+class FeedRequest:
     domain: str
     secure: bool
 
@@ -70,9 +70,9 @@ class Podcast(PodcastBaseModel):
         url = self.get_absolute_url()
         return format_html(f'<a href={url}>xml</a>')
 
-    def set_request(self, request) -> FeedRequestURL:
+    def set_request(self, request) -> FeedRequest:
         current_site = get_current_site(request)
-        self._request = FeedRequestURL(current_site.domain, request.is_secure())
+        self._request = FeedRequest(current_site.domain, request.is_secure())
         return self._request
 
     def abs_url(self, url: str) -> str:
