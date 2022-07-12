@@ -1,8 +1,8 @@
 from datetime import timedelta
-from django.utils import timezone
 
 from django.core.files.base import ContentFile
 from django.test import TestCase
+from django.utils import timezone
 
 from .models import Episode, Podcast
 
@@ -36,7 +36,8 @@ class FeedTestCase(TestCase):
                     description=f'Episode Description{j}',
                     title=f'Episode Podcast {p.id} {j}',
                     published=now - timedelta(days=1) if j % 2 else None,
-                    image=ContentFile(b'file', name=f'episode image{j}.png'),
+                    image=ContentFile(b'file', name=f'episode image{j}.png') if j < 5 else None,
+                    public_image='https://github.com/z0rr0/daf.png' if j >= 5 else '',
                     audio=ContentFile(b'audio', name=f'audio{j}.mp3'),
                 )
                 for j in range(10)
@@ -58,6 +59,11 @@ class FeedTestCase(TestCase):
             for episode in self.episodes[podcast.id]
             if episode.published is not None
         ]
+        for episode in episodes:
+            if episode.image:
+                episode.image_url = f'http://testserver{episode.image.url}'
+            else:
+                episode.image_url = episode.public_image
         episodes.sort(key=lambda e: e.published, reverse=True)
         self.assertEqual(len(episodes), 5)
 
@@ -92,7 +98,7 @@ class FeedTestCase(TestCase):
             \turl="http://testserver{episode.audio.url}"/>
             <itunes:author>{episode.author}</itunes:author>
             <itunes:summary>{episode.description}</itunes:summary>
-            <itunes:image href="http://testserver{episode.image.url}"/>
+            <itunes:image href="{episode.image_full_url}"/>
             </item>"""
             for episode in episodes
         ]

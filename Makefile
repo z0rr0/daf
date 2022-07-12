@@ -8,7 +8,10 @@ DOCKER_TAG=z0rr0/daf
 
 all: test
 
-test:
+lint:
+	@flake8 --max-line-length=120 --exclude=migrations,settings.py daf
+
+test: lint
 	@mkdir -p daf/static
 	python $(MANAGE) test podcast
 

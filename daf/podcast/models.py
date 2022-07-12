@@ -39,6 +39,7 @@ class CreatedUpdatedModel(models.Model):
 class PodcastBaseModel(CreatedUpdatedModel):
     title = models.CharField(_('title'), max_length=255, unique=True)
     image = models.ImageField(_('image'), upload_to='images', blank=True)
+    public_image = models.URLField(_('public image'), blank=True)  # less priority
     author = models.CharField(_('author'), max_length=512, blank=True)
     description = models.TextField(_('description'), default='', blank=True)
 
@@ -84,7 +85,7 @@ class Podcast(PodcastBaseModel):
 
     @property
     def image_url(self) -> str:
-        return self.abs_url(self.image.url)
+        return self.abs_url(self.image.url) if self.image else self.public_image
 
 
 def podcast_directory_path(episode: 'Episode', filename: str) -> str:
@@ -109,3 +110,9 @@ class Episode(PodcastBaseModel):
     def pub_date(self) -> str:
         fmt = '%a, %d %b %Y %H:%M:%S %z'
         return self.published.strftime(fmt) if self.published else ''
+
+    @property
+    def image_full_url(self) -> str:
+        if url := getattr(self, 'image_url', None):
+            return url
+        return self.public_image

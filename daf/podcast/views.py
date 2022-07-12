@@ -81,7 +81,7 @@ class EpisodesFeed(Feed):
         ).select_related('podcast').order_by('-published')
         for item in items:
             item.audio_url = obj.abs_url(item.audio.url)
-            item.image_url = obj.abs_url(item.image.url) if item.image else ''
+            item.image_url = obj.abs_url(item.image.url) if item.image else item.public_image
         return items
 
     def item_author_name(self, item: Episode) -> str:
