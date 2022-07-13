@@ -4,6 +4,7 @@ from django.contrib import admin
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.syndication.views import add_domain
 from django.db import models
+from django.template.defaultfilters import filesizeformat
 from django.urls import reverse_lazy
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
@@ -116,3 +117,7 @@ class Episode(PodcastBaseModel):
         if url := getattr(self, 'image_url', None):
             return url
         return self.public_image
+
+    @admin.display(description=_('size'))
+    def size(self) -> str:
+        return filesizeformat(self.audio.size) if self.audio else '-'
