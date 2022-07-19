@@ -2,6 +2,7 @@ from datetime import timedelta
 
 from django.core.files.base import ContentFile
 from django.test import TestCase
+from django.test.utils import override_settings
 from django.utils import timezone
 
 from .models import Episode, Podcast
@@ -49,6 +50,7 @@ class FeedTestCase(TestCase):
         resp = self.client.get(self.URL.format('not-found'))
         self.assertEqual(resp.status_code, 404)
 
+    @override_settings(PODCAST_TTL=60)
     def test_feed(self):
         podcast = self.podcasts[0]
         resp = self.client.get(self.URL.format(podcast.slug))
@@ -69,8 +71,9 @@ class FeedTestCase(TestCase):
 
         pub_date = episodes[0].pub_date
         expected = (f"""<?xml version="1.0" encoding="utf-8"?>
-            <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-            <channel xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+            <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"
+            \txmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+            <channel>
             <title>{podcast.title}</title>
             <link>http://testserver/podcast/{podcast.slug}/rss</link>
             <description>{podcast.description}</description>
@@ -79,12 +82,19 @@ class FeedTestCase(TestCase):
             <language>en-us</language>
             <copyright>{podcast.copyright}</copyright>
             <lastBuildDate>{pub_date}</lastBuildDate>
+            <ttl>60</ttl>
+            <sy:updatePeriod>hourly</sy:updatePeriod>
+            <sy:updateFrequency>1</sy:updateFrequency>
             <itunes:author>{podcast.author}</itunes:author>
             <itunes:subtitle>{podcast.subtitle}</itunes:subtitle>
             <itunes:summary>{podcast.description}</itunes:summary>
             <itunes:keywords>{podcast.keywords}</itunes:keywords>
             <itunes:explicit>no</itunes:explicit>
-            <itunes:image href="http://testserver{podcast.image.url}"/>""")
+            <itunes:image href="http://testserver{podcast.image.url}"/>
+            <image><title>{podcast.title}</title>
+            <url>http://testserver{podcast.image.url}</url>
+            <link>http://testserver/podcast/{podcast.slug}/rss</link>
+            </image>""")
 
         items = [
             f"""<item><title>{episode.title}</title>

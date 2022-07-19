@@ -11,13 +11,26 @@ from .models import Episode, Podcast
 class ITunesFeed(Rss201rev2Feed):
     """Extension to the RSS v2 feed class to add iTunes specific elements."""
 
-    def root_attributes(self):
-        attrs = super().root_attributes()
-        attrs['xmlns:itunes'] = 'http://www.itunes.com/dtds/podcast-1.0.dtd'
+    def rss_attributes(self):
+        attrs = super().rss_attributes()
+        attrs.update({
+            'xmlns:itunes': 'http://www.itunes.com/dtds/podcast-1.0.dtd'
+        })
         return attrs
+
+    def _image(self, handler):
+        handler.startElement('image', {})
+        handler.addQuickElement('title', self.feed['title'])
+        handler.addQuickElement('url', self.feed['image'])
+        handler.addQuickElement('link', self.feed['link'])
+        handler.endElement('image')
 
     def add_root_elements(self, handler):
         super().add_root_elements(handler)
+
+        handler.addQuickElement('sy:updatePeriod', 'hourly')
+        handler.addQuickElement('sy:updateFrequency', '1')
+
         handler.addQuickElement('itunes:author', self.feed['author_name'])
         handler.addQuickElement('itunes:subtitle', self.feed['subtitle'])
         handler.addQuickElement('itunes:summary', self.feed['description'])
@@ -27,6 +40,7 @@ class ITunesFeed(Rss201rev2Feed):
             'itunes:image',
             attrs={'href': self.feed['image']},
         )
+        self._image(handler)
 
     def add_item_elements(self, handler, item):
         super().add_item_elements(handler, item)
@@ -39,6 +53,7 @@ class EpisodesFeed(Feed):
     """Main feed generator class."""
     feed_type = ITunesFeed
     language = settings.LANGUAGE_CODE
+    ttl = settings.PODCAST_TTL
 
     def get_object(self, request, *args, **kwargs) -> Podcast:
         obj = Podcast.objects.get(slug=kwargs.get('podcast'))
