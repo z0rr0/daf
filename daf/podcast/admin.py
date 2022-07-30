@@ -11,7 +11,7 @@ class PodcastAdmin(admin.ModelAdmin):
 
 
 class EpisodeAdmin(admin.ModelAdmin):
-    list_display = ['title', 'audio', 'size', 'published', 'created']
+    list_display = ['title', 'audio', 'size', 'play', 'published', 'created']
     search_fields = ('title', 'description')
     list_select_related = ['podcast']
     list_filter = ['created', 'podcast', 'published']
