@@ -54,7 +54,14 @@ class EpisodeUploadTestCase(PodcastBaseTestCase):
         resp = self.client.get(self.URL.format(self.podcasts[0].slug))
         self.assertEqual(resp.status_code, 405)
 
-    def test_upload_episode(self):
+    def test_unknown_podcast(self):
+        resp = self.client.post(self.URL.format('bad_name'))
+        self.assertEqual(resp.status_code, 404)
+
+        expected = {'status': 'error', 'message': 'podcast does not exist', 'code': 'not_found'}
+        self.assertDictEqual(resp.json(), expected)
+
+    def _success_upload(self, publish: bool = False) -> Episode:
         # 1 px image
         img = (b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90"
                b"wS\xde\x00\x00\x00\tpHYs\x00\x00.#\x00\x00.#\x01x\xa5?v\x00\x00\x00\x07"
@@ -73,15 +80,30 @@ class EpisodeUploadTestCase(PodcastBaseTestCase):
             'description': 'Episode Description',
             'audio': ContentFile(b'audio', name='episode_audio.mp3'),
         }
+        if publish:
+            data['publish'] = True
+
         resp = self.client.post(self.URL.format(podcast.slug), data=data)
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(podcast.episode_set.count(), n + 1)
 
         episode = podcast.episode_set.last()
-        self.assertIsNotNone(episode.published)
 
-        expected = f'ok, episode "{title}" uploaded, id={episode.id}'
-        self.assertEqual(resp.content.decode('utf-8'), expected)
+        expected = {
+            'status': 'ok',
+            'message': f'episode "{episode.title}" uploaded, id={episode.id}',
+            'code': 'success',
+        }
+        self.assertDictEqual(resp.json(), expected)
+        return episode
+
+    def test_upload_episode(self):
+        episode = self._success_upload()
+        self.assertIsNone(episode.published)
+
+    def test_upload_with_publish(self):
+        episode = self._success_upload(True)
+        self.assertIsNotNone(episode.published)
 
     def test_failed_upload_title_duplicate(self):
         podcast = self.podcasts[0]
@@ -100,8 +122,20 @@ class EpisodeUploadTestCase(PodcastBaseTestCase):
         self.assertEqual(resp.status_code, 400)
         self.assertEqual(podcast.episode_set.count(), n)
 
-        expected = 'oops, errors: {"title": [{"message": "Episode with this Title already exists.", "code": "unique"}]}'
-        self.assertEqual(resp.content.decode('utf-8'), expected)
+        expected = {
+            'status': 'error',
+            'message': 'validation failed',
+            'code': 'invalid_data',
+            'fields': {
+                'title': [
+                    {
+                        'message': 'Episode with this Title already exists.',
+                        'code': 'unique',
+                    }
+                ]
+            }
+        }
+        self.assertDictEqual(resp.json(), expected)
 
 
 class FeedTestCase(PodcastBaseTestCase):

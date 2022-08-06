@@ -3,8 +3,7 @@ from typing import Any, Dict, Iterable, List
 
 from django.conf import settings
 from django.contrib.syndication.views import Feed
-from django.http import HttpResponse, HttpResponseBadRequest
-from django.shortcuts import get_object_or_404
+from django.http import HttpResponse, JsonResponse
 from django.utils.feedgenerator import Enclosure, Rss201rev2Feed
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
@@ -137,11 +136,33 @@ class EpisodesFeed(Feed):
 @csrf_exempt  # method is to be protected by basic auth
 def upload(request, podcast: str) -> HttpResponse:
     """Upload a new episode to a podcast."""
-    podcast = get_object_or_404(Podcast, slug=podcast)
+    try:
+        podcast = Podcast.objects.get(slug=podcast)
+    except Podcast.DoesNotExist:
+        return JsonResponse(
+            {
+                'status': 'error',
+                'message': 'podcast does not exist',
+                'code': 'not_found',
+            },
+            status=404,
+        )
     form = EpisodeForm(request.POST, request.FILES, podcast=podcast)
     if not form.is_valid():
-        errors = form.errors.as_json()
-        return HttpResponseBadRequest(f'oops, errors: {errors}')
+        errors = form.errors.get_json_data()
+        return JsonResponse(
+            {
+                'status': 'error',
+                'message': 'validation failed',
+                'code': 'invalid_data',
+                'fields': errors,
+            },
+            status=400,
+        )
 
     episode = form.save()
-    return HttpResponse(f'ok, episode "{episode.title}" uploaded, id={episode.id}')
+    return JsonResponse({
+        'status': 'ok',
+        'message': f'episode "{episode.title}" uploaded, id={episode.id}',
+        'code': 'success',
+    })
