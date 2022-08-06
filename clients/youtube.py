@@ -28,9 +28,9 @@ import requests
 
 
 class YouTubeEpisodeHandler:
-    URL = 'http://127.0.0.1:8002'
 
     def __init__(self, ns: argparse.Namespace) -> None:
+        self.base_url: str = ns.base_url or os.getenv('DAF_URL') or 'http://127.0.0.1:8002'
         self.youtube_url: str = ns.url[0]
 
         self.title: str = ns.title
@@ -73,11 +73,15 @@ class YouTubeEpisodeHandler:
     def prepare(self) -> str:
         """Does all preparation steps."""
         self.prepare_description()
-        return self.prepare_audio()
+        filename = self.prepare_audio()
+
+        stat_result = os.stat(filename)
+        print(f'audio file size: {stat_result.st_size}')
+        return filename
 
     def upload(self, filename: str) -> None:
         """Uploads the episode to DAF."""
-        upload_url = f'{self.URL}/podcast/{self.slug}/upload'
+        upload_url = f'{self.base_url}/podcast/{self.slug}/upload'
         data = {
             'title': self.title,
             'public_image': self.public_image,
@@ -87,6 +91,8 @@ class YouTubeEpisodeHandler:
         }
         auth = (self.user, self.password) if self.user else None
         name = self.name or filename
+
+        print(f'start uploading to {upload_url}')
         with open(filename, 'rb') as f:
             files = {'audio': (name, f)}
             if self.image:
@@ -117,6 +123,7 @@ class YouTubeEpisodeHandler:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='YouTube audio DAF uploader')
+    parser.add_argument('-b', dest='base_url', type=str, help='DAF base URL (default env DAF_URL)')
     parser.add_argument('-t', dest='title', type=str, required=True, help='episode title')
     parser.add_argument('-i', dest='image', type=argparse.FileType('rb'), help='image file')
     parser.add_argument('-l', dest='public_image', type=str, help='public image url')
@@ -124,10 +131,10 @@ if __name__ == '__main__':
     parser.add_argument('-d', dest='description', type=argparse.FileType(), required=True, help='description file')
     parser.add_argument('-e', dest='publish', action='store_true', help='publish episode')
 
-    parser.add_argument('-s', dest='slug', type=str, required=True, help='podcast slug')
+    parser.add_argument('-s', dest='slug', type=str, default='youtube', help='podcast slug (default "youtube")')
     parser.add_argument('-n', dest='name', type=str, help='episode file name')
-    parser.add_argument('-u', dest='user', type=str, help='basic auth user')
-    parser.add_argument('-p', dest='password', type=str, help='basic auth password')
+    parser.add_argument('-u', dest='user', type=str, help='basic auth user (default env DAF_USER)')
+    parser.add_argument('-p', dest='password', type=str, help='basic auth password (default env DAF_PASSWORD)')
 
     parser.add_argument('url', nargs='+', type=str, help='youtube url')
     namespace, _ = parser.parse_known_args()

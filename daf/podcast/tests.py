@@ -91,7 +91,7 @@ class EpisodeUploadTestCase(PodcastBaseTestCase):
 
         expected = {
             'status': 'ok',
-            'message': f'episode "{episode.title}" uploaded, id={episode.id}',
+            'message': f'episode "{episode.title}" was uploaded, id={episode.id}',
             'code': 'success',
         }
         self.assertDictEqual(resp.json(), expected)

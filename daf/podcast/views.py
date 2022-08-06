@@ -163,6 +163,6 @@ def upload(request, podcast: str) -> HttpResponse:
     episode = form.save()
     return JsonResponse({
         'status': 'ok',
-        'message': f'episode "{episode.title}" uploaded, id={episode.id}',
+        'message': f'episode "{episode.title}" was uploaded, id={episode.id}',
         'code': 'success',
     })
