@@ -96,7 +96,6 @@ class YouTubeEpisodeHandler:
         json_statuses = {200, 400}
         response = resp.json() if resp.status_code in json_statuses else resp.text
 
-        print(response)
         if resp.status_code != 200:
             print(f'status={resp.status_code}\n{response}', file=sys.stderr)
             sys.exit(1)
