@@ -8,8 +8,8 @@ from django.utils import timezone
 from .models import Episode, Podcast
 
 
-class FeedTestCase(TestCase):
-    URL = '/podcast/{}/rss'
+class PodcastBaseTestCase(TestCase):
+    URL = ''
 
     def setUp(self) -> None:
         super().setUp()
@@ -45,6 +45,67 @@ class FeedTestCase(TestCase):
             ]
             for p in self.podcasts
         }
+
+
+class EpisodeUploadTestCase(PodcastBaseTestCase):
+    URL = '/podcast/{}/upload'
+
+    def test_invalid_method(self):
+        resp = self.client.get(self.URL.format(self.podcasts[0].slug))
+        self.assertEqual(resp.status_code, 405)
+
+    def test_upload_episode(self):
+        # 1 px image
+        img = (b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90"
+               b"wS\xde\x00\x00\x00\tpHYs\x00\x00.#\x00\x00.#\x01x\xa5?v\x00\x00\x00\x07"
+               b"tIME\x07\xe6\x08\x06\x05;\x15Nv\x8f\x1a\x00\x00\x00\x0c"
+               b"IDAT\x08\xd7c```\x00\x00\x00\x04\x00\x01'4'\n\x00\x00\x00\x00IEND\xaeB`\x82")
+
+        podcast = self.podcasts[0]
+        n = podcast.episode_set.count()
+        title = 'Episode Title'
+
+        data = {
+            'title': title,
+            'image': ContentFile(img, name='episode_image.png'),
+            'public_image': 'https://github.com/z0rr0/daf.png',
+            'author': 'Episode Author',
+            'description': 'Episode Description',
+            'audio': ContentFile(b'audio', name='episode_audio.mp3'),
+        }
+        resp = self.client.post(self.URL.format(podcast.slug), data=data)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(podcast.episode_set.count(), n + 1)
+
+        episode = podcast.episode_set.last()
+        self.assertIsNotNone(episode.published)
+
+        expected = f'ok, episode "{title}" uploaded, id={episode.id}'
+        self.assertEqual(resp.content.decode('utf-8'), expected)
+
+    def test_failed_upload_title_duplicate(self):
+        podcast = self.podcasts[0]
+        n = podcast.episode_set.count()
+        title = f'Episode Podcast {podcast.id} 0'  # created in setUp()
+        resp = self.client.post(
+            self.URL.format(podcast.slug),
+            data={
+                'title': title,
+                'public_image': 'https://github.com/z0rr0/daf.png',
+                'author': 'Episode Author',
+                'description': 'Episode Description',
+                'audio': ContentFile(b'audio', name='episode_audio.mp3'),
+            },
+        )
+        self.assertEqual(resp.status_code, 400)
+        self.assertEqual(podcast.episode_set.count(), n)
+
+        expected = 'oops, errors: {"title": [{"message": "Episode with this Title already exists.", "code": "unique"}]}'
+        self.assertEqual(resp.content.decode('utf-8'), expected)
+
+
+class FeedTestCase(PodcastBaseTestCase):
+    URL = '/podcast/{}/rss'
 
     def test_not_found(self):
         resp = self.client.get(self.URL.format('not-found'))

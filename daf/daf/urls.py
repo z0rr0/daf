@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from django.urls import include, path
 
 
-def index(_):
+def index(_) -> HttpResponse:
     return HttpResponse('Django Audio Feed')
 
 

@@ -3,8 +3,13 @@ from typing import Any, Dict, Iterable, List
 
 from django.conf import settings
 from django.contrib.syndication.views import Feed
+from django.http import HttpResponse, HttpResponseBadRequest
+from django.shortcuts import get_object_or_404
 from django.utils.feedgenerator import Enclosure, Rss201rev2Feed
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 
+from .forms import EpisodeForm
 from .models import Episode, Podcast
 
 
@@ -126,3 +131,17 @@ class EpisodesFeed(Feed):
 
     def item_extra_kwargs(self, item: Episode) -> Dict[str, Any]:
         return {'image': getattr(item, 'image_url', '')}
+
+
+@require_POST
+@csrf_exempt  # method is to be protected by basic auth
+def upload(request, podcast: str) -> HttpResponse:
+    """Upload a new episode to a podcast."""
+    podcast = get_object_or_404(Podcast, slug=podcast)
+    form = EpisodeForm(request.POST, request.FILES, podcast=podcast)
+    if not form.is_valid():
+        errors = form.errors.as_json()
+        return HttpResponseBadRequest(f'oops, errors: {errors}')
+
+    episode = form.save()
+    return HttpResponse(f'ok, episode "{episode.title}" uploaded, id={episode.id}')
