@@ -15,6 +15,14 @@ class EpisodeForm(forms.ModelForm):
         self.podcast: Podcast = kwargs.pop('podcast')
         super().__init__(*args, **kwargs)
 
+    def clean_audio(self):
+        audio = self.cleaned_data.get('audio')
+        if audio:
+            mime_type = Episode.get_mime_type(audio.name)
+            if not mime_type:
+                raise forms.ValidationError('invalid audio file type', code='invalid_type')
+        return audio
+
     def save(self, commit=True):
         instance = super().save(commit=False)
         instance.podcast = self.podcast

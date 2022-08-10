@@ -133,6 +133,19 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOCALE_PATHS = [BASE_DIR.joinpath('locale')]
 
+# known audio file extensions
+MIME_TYPES = {
+    '3gp': 'audio/3gpp',
+    'aac': 'audio/aac',
+    'm4a': 'audio/mp4',
+    'm4b': 'audio/x-m4b',
+    'mp3': 'audio/mpeg',
+    'oga': 'audio/ogg',
+    'ogg': 'audio/ogg',
+    'wav': 'audio/wav',
+    'weba': 'audio/webm',
+}
+
 if 'test' not in sys.argv:
     # overwrite custom settings
     try:

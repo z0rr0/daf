@@ -119,7 +119,7 @@ class EpisodesFeed(Feed):
         return [Enclosure(
             url=getattr(item, 'audio_url', ''),
             length=str(item.audio.file.size),
-            mime_type='audio/mp3'
+            mime_type=item.mime_type,
         )]
 
     def item_pubdate(self, item: Episode) -> datetime:

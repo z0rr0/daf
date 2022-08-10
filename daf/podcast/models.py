@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+from django.conf import settings
 from django.contrib import admin
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.syndication.views import add_domain
@@ -117,6 +118,15 @@ class Episode(PodcastBaseModel):
         if url := getattr(self, 'image_url', None):
             return url
         return self.public_image
+
+    @staticmethod
+    def get_mime_type(filename: str) -> str:
+        extension = filename.split('.')[-1].lower()
+        return settings.MIME_TYPES.get(extension, '')
+
+    @property
+    def mime_type(self) -> str:
+        return self.get_mime_type(self.audio.name)
 
     @admin.display(description=_('size'))
     def size(self) -> str:

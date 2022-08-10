@@ -1,4 +1,5 @@
 from datetime import timedelta
+from typing import Any, Dict, Optional
 
 from django.core.files.base import ContentFile
 from django.test import TestCase
@@ -50,11 +51,11 @@ class PodcastBaseTestCase(TestCase):
 class EpisodeUploadTestCase(PodcastBaseTestCase):
     URL = '/podcast/{}/upload'
 
-    def test_invalid_method(self):
+    def test_invalid_method(self) -> None:
         resp = self.client.get(self.URL.format(self.podcasts[0].slug))
         self.assertEqual(resp.status_code, 405)
 
-    def test_unknown_podcast(self):
+    def test_unknown_podcast(self) -> None:
         resp = self.client.post(self.URL.format('bad_name'))
         self.assertEqual(resp.status_code, 404)
 
@@ -97,31 +98,35 @@ class EpisodeUploadTestCase(PodcastBaseTestCase):
         self.assertDictEqual(resp.json(), expected)
         return episode
 
-    def test_upload_episode(self):
+    def test_upload_episode(self) -> None:
         episode = self._success_upload()
         self.assertIsNone(episode.published)
 
-    def test_upload_with_publish(self):
+    def test_upload_with_publish(self) -> None:
         episode = self._success_upload(True)
         self.assertIsNotNone(episode.published)
 
-    def test_failed_upload_title_duplicate(self):
+    def _fail_upload(self, expected: Dict[str, Any], data: Optional[Dict[str, Any]] = None) -> None:
         podcast = self.podcasts[0]
         n = podcast.episode_set.count()
-        title = f'Episode Podcast {podcast.id} 0'  # created in setUp()
-        resp = self.client.post(
-            self.URL.format(podcast.slug),
-            data={
-                'title': title,
-                'public_image': 'https://github.com/z0rr0/daf.png',
-                'author': 'Episode Author',
-                'description': 'Episode Description',
-                'audio': ContentFile(b'audio', name='episode_audio.mp3'),
-            },
-        )
-        self.assertEqual(resp.status_code, 400)
-        self.assertEqual(podcast.episode_set.count(), n)
 
+        request_data = {
+            'title': 'New podcast episode',
+            'public_image': 'https://github.com/z0rr0/daf.png',
+            'author': 'Episode Author',
+            'description': 'Episode Description',
+            'audio': ContentFile(b'audio', name='episode_audio.mp3'),
+        }
+        if data:
+            request_data.update(data)
+
+        resp = self.client.post(self.URL.format(podcast.slug), data=request_data)
+        self.assertEqual(resp.status_code, 400)
+
+        self.assertEqual(podcast.episode_set.count(), n)
+        self.assertDictEqual(resp.json(), expected)
+
+    def test_failed_upload_title_duplicate(self) -> None:
         expected = {
             'status': 'error',
             'message': 'validation failed',
@@ -135,18 +140,36 @@ class EpisodeUploadTestCase(PodcastBaseTestCase):
                 ]
             }
         }
-        self.assertDictEqual(resp.json(), expected)
+        podcast = self.podcasts[0]
+        title = f'Episode Podcast {podcast.id} 0',  # created in setUp(),
+        self._fail_upload(expected, data={'title': title})
+
+    def test_failed_audio_type(self) -> None:
+        expected = {
+            'status': 'error',
+            'message': 'validation failed',
+            'code': 'invalid_data',
+            'fields': {
+                'audio': [
+                    {
+                        'message': 'invalid audio file type',
+                        'code': 'invalid_type',
+                    }
+                ]
+            }
+        }
+        self._fail_upload(expected, data={'audio': ContentFile(b'audio', name='episode_audio.txt')})
 
 
 class FeedTestCase(PodcastBaseTestCase):
     URL = '/podcast/{}/rss'
 
-    def test_not_found(self):
+    def test_not_found(self) -> None:
         resp = self.client.get(self.URL.format('not-found'))
         self.assertEqual(resp.status_code, 404)
 
     @override_settings(PODCAST_TTL=60)
-    def test_feed(self):
+    def test_feed(self) -> None:
         podcast = self.podcasts[0]
         resp = self.client.get(self.URL.format(podcast.slug))
         self.assertEqual(resp.status_code, 200)
@@ -199,7 +222,7 @@ class FeedTestCase(PodcastBaseTestCase):
             {episode.author}</dc:creator>
             <pubDate>{episode.pub_date}</pubDate>
             <guid>{episode.id}</guid>
-            <enclosure length="5" type="audio/mp3"
+            <enclosure length="5" type="{episode.mime_type}"
             \turl="http://testserver{episode.audio.url}"/>
             <itunes:author>{episode.author}</itunes:author>
             <itunes:summary>{episode.description}</itunes:summary>
