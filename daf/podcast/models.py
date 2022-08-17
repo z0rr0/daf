@@ -135,4 +135,4 @@ class Episode(PodcastBaseModel):
     @admin.display(description=_('play'))
     def play(self) -> str:
         url = self.get_absolute_url()
-        return format_html(f'<audio controls src={url}>-</audio>')
+        return format_html(f'<audio controls preload="metadata" src="{url}">-</audio>')
