@@ -1,4 +1,4 @@
-FROM alpine:3.16
+FROM alpine:3.17
 MAINTAINER Alexander Zaytsev "me@axv.email"
 
 # https://docs.djangoproject.com/en/4.0/howto/deployment/wsgi/uwsgi/
