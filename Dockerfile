@@ -1,5 +1,5 @@
 FROM alpine:3.17
-MAINTAINER Aleksander Zaitsev "me@axv.email"
+MAINTAINER Aleksandr Zaitsev "me@axv.email"
 
 # https://docs.djangoproject.com/en/4.0/howto/deployment/wsgi/uwsgi/
 # https://uwsgi.readthedocs.io/en/latest/tutorials/Django_and_nginx.html
