@@ -14,36 +14,54 @@ Requirements:
     yt-dlp==2022.7.18
     requests==2.28.1
 """
-import argparse
 import io
 import os
 import subprocess
 import sys
 import tempfile
+from dataclasses import dataclass
 from datetime import datetime
+from pprint import pprint
 from typing import Optional
 
+import argparse
 import markdown
 import requests
 
 
+@dataclass(frozen=True)
+class YouTubeParams:
+    base_url: str
+    youtube_url: str
+    title: str
+    image: Optional[io.BytesIO]
+    public_image: str
+    author: str
+    description: io.TextIOBase
+    publish: bool
+    slug: str
+    name: str
+    password: str
+    user: str
+
+
 class YouTubeEpisodeHandler:
 
-    def __init__(self, ns: argparse.Namespace) -> None:
-        self.base_url: str = ns.base_url or os.getenv('DAF_URL') or 'http://127.0.0.1:8002'
-        self.youtube_url: str = ns.url[0]
+    def __init__(self, p: YouTubeParams) -> None:
+        self.base_url: str = p.base_url or os.getenv('DAF_URL') or 'http://127.0.0.1:8002'
+        self.youtube_url: str = p.youtube_url
 
-        self.title: str = ns.title
-        self.image: Optional[io.BytesIO] = ns.image
-        self.public_image: str = ns.public_image
-        self.author: str = ns.author
-        self.description: io.TextIOBase = ns.description
-        self.publish: bool = ns.publish
-        self.slug: str = ns.slug
-        self.name: str = ns.name
+        self.title: str = p.title
+        self.image: Optional[io.BytesIO] = p.image
+        self.public_image: str = p.public_image
+        self.author: str = p.author
+        self.description: io.TextIOBase = p.description
+        self.publish: bool = p.publish
+        self.slug: str = p.slug
+        self.name: str = p.name
 
-        self.user: str = ns.user or os.getenv('DAF_USER')
-        self.password: str = ns.password or os.getenv('DAF_PASSWORD')
+        self.user: str = p.user or os.getenv('DAF_USER')
+        self.password: str = p.password or os.getenv('DAF_PASSWORD')
 
     @staticmethod
     def _filename() -> str:
@@ -70,13 +88,19 @@ class YouTubeEpisodeHandler:
         print(cmd.stdout.decode())
         return name
 
+    @staticmethod
+    def _size_mb(size: int) -> float:
+        """Converts size in bytes to megabytes."""
+        return size / 1024 / 1024
+
     def prepare(self) -> str:
         """Does all preparation steps."""
         self.prepare_description()
         filename = self.prepare_audio()
 
         stat_result = os.stat(filename)
-        print(f'audio file size: {stat_result.st_size}')
+        size_mb = self._size_mb(stat_result.st_size)
+        print(f'audio file size: {stat_result.st_size} bytes ({size_mb:.2f} MB)')
         return filename
 
     def upload(self, filename: str) -> None:
@@ -106,7 +130,7 @@ class YouTubeEpisodeHandler:
             print(f'status={resp.status_code}\n{response}', file=sys.stderr)
             sys.exit(1)
 
-        print(response)
+        pprint(response, width=120)
 
     def run(self):
         """Main method."""
@@ -139,5 +163,20 @@ if __name__ == '__main__':
     parser.add_argument('url', nargs='+', type=str, help='youtube url')
     namespace, _ = parser.parse_known_args()
 
-    uploader = YouTubeEpisodeHandler(namespace)
+    params = YouTubeParams(
+        base_url=namespace.base_url,
+        youtube_url=namespace.url[0],
+        title=namespace.title,
+        image=namespace.image,
+        public_image=namespace.public_image,
+        author=namespace.author,
+        description=namespace.description,
+        publish=namespace.publish,
+        slug=namespace.slug,
+        name=namespace.name,
+        user=namespace.user,
+        password=namespace.password,
+    )
+
+    uploader = YouTubeEpisodeHandler(params)
     uploader.run()
