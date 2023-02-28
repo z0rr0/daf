@@ -80,12 +80,11 @@ class YouTubeEpisodeHandler:
         """Downloads the audio and returns its filename."""
         name = self._filename()
         print(f'temporary audio file: {name}')
-        cmd = subprocess.run(
+        subprocess.run(
             ['yt-dlp', '--progress', '--extract-audio', '--audio-format=mp3', '-o', name, self.youtube_url],
             capture_output=False,
             check=True,
         )
-        # print(cmd.stdout.decode())
         return name
 
     @staticmethod
