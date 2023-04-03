@@ -18,6 +18,9 @@ test: lint
 docker: test
 	docker build -t $(DOCKER_TAG) .
 
+docker_linux_amd64: test
+	docker buildx build --platform linux/amd64 -t $(DOCKER_TAG) .
+
 start:
 	@echo "  >  $(NAME)"
 	python $(MANAGE) runserver --noreload $(HOST):$(PORT) & echo $$! > $(PID)
