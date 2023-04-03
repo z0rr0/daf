@@ -133,4 +133,5 @@ feeds/
 media/
 static/
 *.sqlite3.bak
+docker_upload.sh
 
