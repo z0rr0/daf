@@ -1,5 +1,11 @@
 FROM alpine:3.17
-MAINTAINER Aleksandr Zaitsev "me@axv.email"
+LABEL org.opencontainers.image.authors="me@axv.email" \
+        org.opencontainers.image.url="https://hub.docker.com/r/z0rr0/daf" \
+        org.opencontainers.image.documentation="https://github.com/z0rr0/daf" \
+        org.opencontainers.image.source="https://github.com/z0rr0/daf" \
+        org.opencontainers.image.licenses="MIT license" \
+        org.opencontainers.image.title="DAF" \
+        org.opencontainers.image.description="Django Audio Feed"
 
 # https://docs.djangoproject.com/en/4.0/howto/deployment/wsgi/uwsgi/
 # https://uwsgi.readthedocs.io/en/latest/tutorials/Django_and_nginx.html
