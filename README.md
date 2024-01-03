@@ -44,7 +44,7 @@ docker run -d --name daf -p 8084:8084 \
 5. Collect static files
 
 ```sh
-docker exec -it daf /bin/bash -c "cd /var/daf && python manage.py collectstatic --no-input"
+docker exec -it daf /bin/sh -c "cd /var/daf && python manage.py collectstatic --no-input"
 ```
 
 6. Check HTTP response:
