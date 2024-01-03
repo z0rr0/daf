@@ -1,3 +1,4 @@
+import os
 from datetime import timedelta
 from typing import Any, Dict, Optional
 
@@ -46,6 +47,31 @@ class PodcastBaseTestCase(TestCase):
             ]
             for p in self.podcasts
         }
+
+    def tearDown(self) -> None:
+        super().tearDown()
+
+        images = [p.image.path for p in self.podcasts if p.image]
+        audio_files = []
+        episodes = (e for episodes in self.episodes.values() for e in episodes)
+
+        for episode in episodes:
+            if episode.image:
+                images.append(episode.image.path)
+
+            if episode.audio:
+                audio_files.append(episode.audio.path)
+
+        Podcast.objects.all().delete()
+        self._clean_files(images)
+        self._clean_files(audio_files)
+
+    @staticmethod
+    def _clean_files(files: list[str]) -> None:
+        real_files = (f for f in files if os.path.isfile(f))
+
+        for f in real_files:
+            os.remove(f)
 
 
 class EpisodeUploadTestCase(PodcastBaseTestCase):
@@ -101,10 +127,12 @@ class EpisodeUploadTestCase(PodcastBaseTestCase):
     def test_upload_episode(self) -> None:
         episode = self._success_upload()
         self.assertIsNone(episode.published)
+        episode.clean_files()
 
     def test_upload_with_publish(self) -> None:
         episode = self._success_upload(True)
         self.assertIsNotNone(episode.published)
+        episode.clean_files()
 
     def _fail_upload(self, expected: Dict[str, Any], data: Optional[Dict[str, Any]] = None) -> None:
         podcast = self.podcasts[0]

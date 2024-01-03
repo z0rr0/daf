@@ -1,3 +1,4 @@
+import os
 from dataclasses import dataclass
 
 from django.conf import settings
@@ -47,6 +48,11 @@ class PodcastBaseModel(CreatedUpdatedModel):
 
     class Meta:
         abstract = True
+
+    def clean_files(self) -> None:
+        """Removes the image if it is set."""
+        if self.image:
+            os.remove(self.image.path)
 
 
 # ----------- real models -----------
@@ -104,6 +110,11 @@ class Episode(PodcastBaseModel):
 
     def __str__(self) -> str:
         return f'{self.podcast.title} - {self.title}'
+
+    def clean_files(self) -> None:
+        super().clean_files()
+        if self.audio:
+            os.remove(self.audio.path)
 
     def get_absolute_url(self) -> str:
         return self.audio.url
