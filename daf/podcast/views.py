@@ -135,11 +135,18 @@ class EpisodesFeed(Feed):
 class CustomEpisodesFeed(EpisodesFeed):
     """Custom feed generator class."""
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.custom_feed: CustomFeed | None = None
+
     def get_object(self, request, *args, **kwargs) -> Podcast:
-        custom_feed = CustomFeed.objects.select_related('podcast').get(ref=kwargs.get('ref'))
-        obj = custom_feed.podcast
+        self.custom_feed = CustomFeed.objects.select_related('podcast').get(ref=kwargs.get('ref'))
+        obj = self.custom_feed.podcast
         obj.set_request(request)
         return obj
+
+    def link(self, _: Podcast) -> str:
+        return self.custom_feed.get_absolute_url() if self.custom_feed else ''
 
 
 @require_POST

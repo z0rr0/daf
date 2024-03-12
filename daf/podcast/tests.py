@@ -195,6 +195,7 @@ class FeedTestCase(PodcastBaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.feed_url = self.URL.format(self.podcasts[0].slug)
+        self.link = f'http://testserver/podcast/{self.podcasts[0].slug}/rss'
 
     def test_not_found(self) -> None:
         resp = self.client.get(self.URL.format('not-found'))
@@ -225,9 +226,9 @@ class FeedTestCase(PodcastBaseTestCase):
             \txmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
             <channel>
             <title>{podcast.title}</title>
-            <link>http://testserver/podcast/{podcast.slug}/rss</link>
+            <link>{self.link}</link>
             <description>{podcast.description}</description>
-            <atom:link href="http://testserver/podcast/podcast0/rss"
+            <atom:link href="{self.link}"
             \trel="self"/>
             <language>en-us</language>
             <copyright>{podcast.copyright}</copyright>
@@ -243,7 +244,7 @@ class FeedTestCase(PodcastBaseTestCase):
             <itunes:image href="http://testserver{podcast.image.url}"/>
             <image><title>{podcast.title}</title>
             <url>http://testserver{podcast.image.url}</url>
-            <link>http://testserver/podcast/{podcast.slug}/rss</link>
+            <link>{self.link}</link>
             </image>""")
 
         items = [
@@ -282,3 +283,4 @@ class CustomFeedTestCase(FeedTestCase):
             title='Custom Feed',
         )
         self.feed_url = self.URL.format(custom_feed.ref)
+        self.link = f'http://testserver/podcast/custom/{custom_feed.ref}'
