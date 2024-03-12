@@ -7,7 +7,7 @@ from django.test import TestCase
 from django.test.utils import override_settings
 from django.utils import timezone
 
-from .models import Episode, Podcast
+from .models import CustomFeed, Episode, Podcast
 
 
 class PodcastBaseTestCase(TestCase):
@@ -192,16 +192,20 @@ class EpisodeUploadTestCase(PodcastBaseTestCase):
 class FeedTestCase(PodcastBaseTestCase):
     URL = '/podcast/{}/rss'
 
+    def setUp(self) -> None:
+        super().setUp()
+        self.feed_url = self.URL.format(self.podcasts[0].slug)
+
     def test_not_found(self) -> None:
         resp = self.client.get(self.URL.format('not-found'))
         self.assertEqual(resp.status_code, 404)
 
     @override_settings(PODCAST_TTL=60)
     def test_feed(self) -> None:
-        podcast = self.podcasts[0]
-        resp = self.client.get(self.URL.format(podcast.slug))
+        resp = self.client.get(self.feed_url)
         self.assertEqual(resp.status_code, 200)
 
+        podcast = self.podcasts[0]
         episodes = [
             episode
             for episode in self.episodes[podcast.id]
@@ -266,3 +270,15 @@ class FeedTestCase(PodcastBaseTestCase):
         result = resp.content.decode('utf-8').replace('\n', '')
 
         self.assertEqual(result, expected)
+
+
+class CustomFeedTestCase(FeedTestCase):
+    URL = '/podcast/custom/{}'
+
+    def setUp(self) -> None:
+        super().setUp()
+        custom_feed = CustomFeed.objects.create(
+            podcast=self.podcasts[0],
+            title='Custom Feed',
+        )
+        self.feed_url = self.URL.format(custom_feed.ref)

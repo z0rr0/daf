@@ -1,4 +1,5 @@
 import os
+import uuid
 from dataclasses import dataclass
 
 from django.conf import settings
@@ -79,7 +80,7 @@ class Podcast(PodcastBaseModel):
     @admin.display(description=_('feed'))
     def feed(self) -> str:
         url = self.get_absolute_url()
-        return format_html(f'<a href={url}>xml</a>')
+        return format_html(f'<a href="{url}" target="_blank">xml</a>')
 
     def set_request(self, request) -> FeedRequest:
         current_site = get_current_site(request)
@@ -147,3 +148,22 @@ class Episode(PodcastBaseModel):
     def play(self) -> str:
         url = self.get_absolute_url()
         return format_html(f'<audio controls preload="metadata" src="{url}">-</audio>')
+
+
+class CustomFeed(CreatedUpdatedModel):
+    """Custom podcast feeds."""
+
+    ref = models.UUIDField(_('reference'), default=uuid.uuid4, editable=False, unique=True)
+    podcast = models.ForeignKey(Podcast, on_delete=models.CASCADE)
+    title = models.CharField(_('title'), max_length=255)
+
+    def __str__(self) -> str:
+        return self.title
+
+    def get_absolute_url(self) -> str:
+        return reverse_lazy('custom_feed', args=[self.ref])
+
+    @admin.display(description=_('feed'))
+    def feed(self) -> str:
+        url = self.get_absolute_url()
+        return format_html(f'<a href="{url}" target="_blank">{self.ref}</a>')

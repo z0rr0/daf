@@ -9,7 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from .forms import EpisodeForm
-from .models import Episode, Podcast
+from .models import CustomFeed, Episode, Podcast
 
 
 class ITunesFeed(Rss201rev2Feed):
@@ -130,6 +130,16 @@ class EpisodesFeed(Feed):
 
     def item_extra_kwargs(self, item: Episode) -> Dict[str, Any]:
         return {'image': getattr(item, 'image_url', '')}
+
+
+class CustomEpisodesFeed(EpisodesFeed):
+    """Custom feed generator class."""
+
+    def get_object(self, request, *args, **kwargs) -> Podcast:
+        custom_feed = CustomFeed.objects.select_related('podcast').get(ref=kwargs.get('ref'))
+        obj = custom_feed.podcast
+        obj.set_request(request)
+        return obj
 
 
 @require_POST
