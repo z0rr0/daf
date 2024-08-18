@@ -76,14 +76,28 @@ class YouTubeEpisodeHandler:
         """Converts the description from Markdown to HTML."""
         self.description = markdown.markdown(self.description.read())
 
+    @staticmethod
+    def get_env() -> dict[str, str]:
+        """Returns environment variables for yt-dlp."""
+        env = os.environ.copy()
+        if http_proxy := os.getenv('HTTP_PROXY'):
+            env['http_proxy'] = http_proxy
+
+        if https_proxy := os.getenv('HTTPS_PROXY'):
+            env['https_proxy'] = https_proxy
+
+        return env
+
     def prepare_audio(self) -> str:
         """Downloads the audio and returns its filename."""
         name = self._filename()
         print(f'temporary audio file: {name}')
+
         subprocess.run(
             ['yt-dlp', '--progress', '--extract-audio', '--audio-format=mp3', '-o', name, self.youtube_url],
             capture_output=False,
             check=True,
+            env=self.get_env()
         )
         return name
 
@@ -146,7 +160,7 @@ class YouTubeEpisodeHandler:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='YouTube audio DAF uploader')
-    parser.add_argument('-b', dest='base_url', type=str, help='DAF base URL (default env DAF_URL)')
+    parser.add_argument('-b', dest='base_url', type=str, help='DAF base URL (env DAF_URL)')
     parser.add_argument('-t', dest='title', type=str, required=True, help='episode title')
     parser.add_argument('-i', dest='image', type=argparse.FileType('rb'), help='image file')
     parser.add_argument('-l', dest='public_image', type=str, help='public image url')
