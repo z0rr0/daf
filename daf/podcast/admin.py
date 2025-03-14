@@ -15,6 +15,8 @@ class EpisodeAdmin(admin.ModelAdmin):
     search_fields = ('title', 'description')
     list_select_related = ['podcast']
     list_filter = ['created', 'podcast', 'published']
+    list_per_page = 20
+    list_max_show_all = 200
 
 
 class CustomFeedAdmin(admin.ModelAdmin):

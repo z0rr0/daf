@@ -6,7 +6,7 @@ from django.urls import include, path
 
 
 def index(_) -> HttpResponse:
-    return HttpResponse('Django Audio Feed')
+    return HttpResponse(b'Django Audio Feed')
 
 
 urlpatterns = [
