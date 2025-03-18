@@ -13,7 +13,7 @@ lint:
 
 test: lint
 	@mkdir -p daf/static
-	python $(MANAGE) test podcast
+	uv run $(MANAGE) test podcast
 
 docker: test
 	docker build -t $(DOCKER_TAG) .
@@ -23,7 +23,7 @@ docker_linux_amd64: test
 
 start:
 	@echo "  >  $(NAME)"
-	python $(MANAGE) runserver --noreload $(HOST):$(PORT) & echo $$! > $(PID)
+	uv run $(MANAGE) runserver --noreload $(HOST):$(PORT) & echo $$! > $(PID)
 	@-cat $(PID)
 	@echo "  >  http://$(ADDR):$(PORT)"
 

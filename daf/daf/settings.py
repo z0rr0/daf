@@ -149,7 +149,7 @@ MIME_TYPES = {
 if 'test' not in sys.argv:
     # overwrite custom settings
     try:
-        from .local_settings import *
+        from .local_settings import *  # noqa F403
         print('\nloaded local settings\n')
     except ImportError:
         print('local settings ImportError', file=sys.stderr)
