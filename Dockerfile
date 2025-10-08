@@ -1,4 +1,4 @@
-FROM alpine:3.21
+FROM alpine:3.22
 LABEL org.opencontainers.image.authors="me@axv.email" \
         org.opencontainers.image.url="https://hub.docker.com/r/z0rr0/daf" \
         org.opencontainers.image.documentation="https://github.com/z0rr0/daf" \
