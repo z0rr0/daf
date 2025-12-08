@@ -80,7 +80,7 @@ class Podcast(PodcastBaseModel):
     @admin.display(description=_('feed'))
     def feed(self) -> str:
         url = self.get_absolute_url()
-        return format_html(f'<a href="{url}" target="_blank">xml</a>')
+        return format_html('<a href="{}" target="_blank">xml</a>', url)
 
     def set_request(self, request) -> FeedRequest:
         current_site = get_current_site(request)
@@ -147,7 +147,7 @@ class Episode(PodcastBaseModel):
     @admin.display(description=_('play'))
     def play(self) -> str:
         url = self.get_absolute_url()
-        return format_html(f'<audio controls preload="metadata" src="{url}">-</audio>')
+        return format_html('<audio controls preload="metadata" src="{}">-</audio>', url)
 
 
 class CustomFeed(CreatedUpdatedModel):
@@ -166,4 +166,4 @@ class CustomFeed(CreatedUpdatedModel):
     @admin.display(description=_('feed'))
     def feed(self) -> str:
         url = self.get_absolute_url()
-        return format_html(f'<a href="{url}" target="_blank">{self.ref}</a>')
+        return format_html('<a href="{}" target="_blank">{}</a>', url, self.ref)

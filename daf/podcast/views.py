@@ -18,7 +18,8 @@ class ITunesFeed(Rss201rev2Feed):
     def rss_attributes(self):
         attrs = super().rss_attributes()
         attrs.update({
-            'xmlns:itunes': 'http://www.itunes.com/dtds/podcast-1.0.dtd'
+            'xmlns:itunes': 'http://www.itunes.com/dtds/podcast-1.0.dtd',
+            'xmlns:sy': 'http://purl.org/rss/1.0/modules/syndication/',
         })
         return attrs
 

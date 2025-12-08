@@ -190,6 +190,7 @@ class EpisodeUploadTestCase(PodcastBaseTestCase):
 
 
 class FeedTestCase(PodcastBaseTestCase):
+    maxDiff = 10_000
     URL = '/podcast/{}/rss'
 
     def setUp(self) -> None:
@@ -220,10 +221,12 @@ class FeedTestCase(PodcastBaseTestCase):
         episodes.sort(key=lambda e: e.published, reverse=True)
         self.assertEqual(len(episodes), 5)
 
+        # "\t" will be replaced with " " in the result
         pub_date = episodes[0].pub_date
         expected = (f"""<?xml version="1.0" encoding="utf-8"?>
             <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"
-            \txmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+            \txmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
+            \txmlns:sy="http://purl.org/rss/1.0/modules/syndication/">
             <channel>
             <title>{podcast.title}</title>
             <link>{self.link}</link>
