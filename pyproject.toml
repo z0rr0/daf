@@ -1,11 +1,11 @@
 [project]
 name = "daf"
-version = "1.1.31"
+version = "1.1.32"
 description = "Django Audio Feed is a simple web application that allows to create custom RSS podcast feeds."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "django>=6.0.4",
+    "django>=6.0.5",
     "flake8>=7.3.0",
     "markdown>=3.10.2",
     "pillow>=12.2.0",
