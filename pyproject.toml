@@ -9,7 +9,7 @@ dependencies = [
     "flake8>=7.3.0",
     "markdown>=3.10.2",
     "pillow>=12.2.0",
-    "requests>=2.33.1",
+    "requests>=2.34.2",
 ]
 
 [dependency-groups]
