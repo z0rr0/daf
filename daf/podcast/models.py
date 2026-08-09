@@ -142,7 +142,10 @@ class Episode(PodcastBaseModel):
 
     @admin.display(description=_('size'))
     def size(self) -> str:
-        return filesizeformat(self.audio.size) if self.audio else '-'
+        try:
+            return filesizeformat(self.audio.size) if self.audio else '-'
+        except OSError:
+            return '-'
 
     @admin.display(description=_('play'))
     def play(self) -> str:

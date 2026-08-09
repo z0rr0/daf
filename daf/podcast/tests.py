@@ -1,12 +1,15 @@
 import os
 from datetime import timedelta
 from typing import Any, Dict, Optional
+from unittest import mock
 
 from django.core.files.base import ContentFile
+from django.db import IntegrityError
 from django.test import TestCase
 from django.test.utils import override_settings
 from django.utils import timezone
 
+from .forms import EpisodeForm
 from .models import CustomFeed, Episode, Podcast
 
 
@@ -169,7 +172,7 @@ class EpisodeUploadTestCase(PodcastBaseTestCase):
             }
         }
         podcast = self.podcasts[0]
-        title = f'Episode Podcast {podcast.id} 0',  # created in setUp(),
+        title = f'Episode Podcast {podcast.id} 0'  # created in setUp()
         self._fail_upload(expected, data={'title': title})
 
     def test_failed_audio_type(self) -> None:
@@ -187,6 +190,26 @@ class EpisodeUploadTestCase(PodcastBaseTestCase):
             }
         }
         self._fail_upload(expected, data={'audio': ContentFile(b'audio', name='episode_audio.txt')})
+
+    def test_upload_title_race(self) -> None:
+        podcast = self.podcasts[0]
+        data = {
+            'title': 'Race title',
+            'public_image': 'https://github.com/z0rr0/daf.png',
+            'author': 'Author',
+            'description': 'Desc',
+            'audio': ContentFile(b'audio', name='race.mp3'),
+        }
+        with mock.patch.object(EpisodeForm, 'save', side_effect=IntegrityError):
+            resp = self.client.post(self.URL.format(podcast.slug), data=data)
+        self.assertEqual(resp.status_code, 400)
+        expected = {
+            'status': 'error',
+            'message': 'validation failed',
+            'code': 'invalid_data',
+            'fields': {'title': [{'message': 'Episode with this Title already exists.', 'code': 'unique'}]},
+        }
+        self.assertDictEqual(resp.json(), expected)
 
 
 class FeedTestCase(PodcastBaseTestCase):
@@ -274,6 +297,29 @@ class FeedTestCase(PodcastBaseTestCase):
         result = resp.content.decode('utf-8').replace('\n', '')
 
         self.assertEqual(result, expected)
+
+    def test_feed_skip_missing_audio(self) -> None:
+        episode = self.episodes[self.podcasts[0].id][1]  # published episode, j=1
+        os.remove(episode.audio.path)
+        resp = self.client.get(self.feed_url)
+        self.assertEqual(resp.status_code, 200)
+        self.assertNotIn(episode.title, resp.content.decode('utf-8'))
+
+    def test_feed_no_images(self) -> None:
+        podcast = Podcast.objects.create(
+            author='NoImg Author', title='NoImg Podcast', slug='no-img',
+            description='No images', subtitle='', keywords='', copyright='',
+        )
+        episode = Episode.objects.create(
+            podcast=podcast, title='NoImg Episode', author='EA',
+            description='ED', published=timezone.now(),
+            audio=ContentFile(b'audio2', name='noimg.mp3'),
+        )
+        resp = self.client.get(f'/podcast/{podcast.slug}/rss')
+        self.assertEqual(resp.status_code, 200)
+        content = resp.content.decode('utf-8')
+        self.assertNotIn('itunes:image', content)
+        episode.clean_files()
 
 
 class CustomFeedTestCase(FeedTestCase):

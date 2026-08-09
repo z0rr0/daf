@@ -17,10 +17,8 @@ class EpisodeForm(forms.ModelForm):
 
     def clean_audio(self):
         audio = self.cleaned_data.get('audio')
-        if audio:
-            mime_type = Episode.get_mime_type(audio.name)
-            if not mime_type:
-                raise forms.ValidationError('invalid audio file type', code='invalid_type')
+        if audio and not Episode.get_mime_type(audio.name):
+            raise forms.ValidationError('invalid audio file type', code='invalid_type')
         return audio
 
     def save(self, commit=True):

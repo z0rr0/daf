@@ -3,6 +3,7 @@ from typing import Any, Dict, Iterable, List
 
 from django.conf import settings
 from django.contrib.syndication.views import Feed
+from django.db import IntegrityError
 from django.http import HttpResponse, JsonResponse
 from django.utils.feedgenerator import Enclosure, Rss201rev2Feed
 from django.views.decorators.csrf import csrf_exempt
@@ -41,17 +42,16 @@ class ITunesFeed(Rss201rev2Feed):
         handler.addQuickElement('itunes:summary', self.feed['description'])
         handler.addQuickElement('itunes:keywords', self.feed['keywords'])
         handler.addQuickElement('itunes:explicit', 'no')
-        handler.addQuickElement(
-            'itunes:image',
-            attrs={'href': self.feed['image']},
-        )
-        self._image(handler)
+        if image := self.feed['image']:
+            handler.addQuickElement('itunes:image', attrs={'href': image})
+            self._image(handler)
 
     def add_item_elements(self, handler, item):
         super().add_item_elements(handler, item)
         handler.addQuickElement('itunes:author', item['author_name'])
         handler.addQuickElement('itunes:summary', item['description'])
-        handler.addQuickElement('itunes:image', attrs={'href': item['image']})
+        if item.get('image'):
+            handler.addQuickElement('itunes:image', attrs={'href': item['image']})
 
 
 class EpisodesFeed(Feed):
@@ -96,13 +96,20 @@ class EpisodesFeed(Feed):
         }
 
     def items(self, obj: Podcast) -> Iterable[Episode]:
-        items = obj.episode_set.filter(
-            published__isnull=False,
-        ).select_related('podcast').order_by('-published')
+        items = obj.episode_set.filter(published__isnull=False).select_related('podcast').order_by('-published')
+
+        result = []
         for item in items:
+            try:
+                audio_size = item.audio.size
+            except OSError:
+                continue
+            item.audio_size = audio_size
             item.audio_url = obj.abs_url(item.audio.url)
             item.image_url = obj.abs_url(item.image.url) if item.image else item.public_image
-        return items
+            result.append(item)
+
+        return result
 
     def item_author_name(self, item: Episode) -> str:
         return item.author or item.podcast.author
@@ -119,7 +126,7 @@ class EpisodesFeed(Feed):
     def item_enclosures(self, item: Episode) -> List[Enclosure]:
         return [Enclosure(
             url=getattr(item, 'audio_url', ''),
-            length=str(item.audio.file.size),
+            length=str(getattr(item, 'audio_size', 0)),
             mime_type=item.mime_type,
         )]
 
@@ -178,7 +185,18 @@ def upload(request, podcast: str) -> HttpResponse:
             status=400,
         )
 
-    episode = form.save()
+    try:
+        episode = form.save()
+    except IntegrityError:
+        return JsonResponse(
+            {
+                'status': 'error',
+                'message': 'validation failed',
+                'code': 'invalid_data',
+                'fields': {'title': [{'message': 'Episode with this Title already exists.', 'code': 'unique'}]},
+            },
+            status=400,
+        )
     return JsonResponse({
         'status': 'ok',
         'message': f'episode "{episode.title}" was uploaded, id={episode.id}',
