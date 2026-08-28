@@ -135,3 +135,6 @@ static/
 *.sqlite3.bak
 docker_upload.sh
 
+# Repository agent instructions (override global ignore rules)
+!CLAUDE.md
+!AGENTS.md

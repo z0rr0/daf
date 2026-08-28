@@ -31,8 +31,8 @@ jobs:
       - name: Install the project
         run: uv sync --all-extras --dev
 
-      - name: Lint with flake8
-        run: flake8 . --max-line-length=120 --exclude=.env,.venv,migrations,settings.py
+      - name: Lint with Ruff
+        run: uv run ruff check .
 
       - name: Run Tests
         run: make test

@@ -9,7 +9,7 @@ DOCKER_TAG=z0rr0/daf
 all: test
 
 lint:
-	@flake8 --max-line-length=120 --exclude=migrations,settings.py daf
+	@uv run ruff check .
 
 test: lint
 	@mkdir -p daf/static

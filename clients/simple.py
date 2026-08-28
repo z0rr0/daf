@@ -5,12 +5,12 @@ Requirements:
     Markdown==3.4.1
     requests==2.28.1
 """
+import argparse
 import io
 import os
 import sys
 from dataclasses import dataclass
 
-import argparse
 import markdown
 import requests
 

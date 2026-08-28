@@ -14,6 +14,7 @@ Requirements:
     yt-dlp==2022.7.18
     requests==2.28.1
 """
+import argparse
 import io
 import os
 import subprocess
@@ -22,9 +23,7 @@ import tempfile
 from dataclasses import dataclass
 from datetime import datetime
 from pprint import pprint
-from typing import Optional
 
-import argparse
 import markdown
 import requests
 
@@ -34,7 +33,7 @@ class YouTubeParams:
     base_url: str
     youtube_url: str
     title: str
-    image: Optional[io.BytesIO]
+    image: io.BytesIO | None
     public_image: str
     author: str
     description: io.TextIOBase
@@ -52,7 +51,7 @@ class YouTubeEpisodeHandler:
         self.youtube_url: str = p.youtube_url
 
         self.title: str = p.title
-        self.image: Optional[io.BytesIO] = p.image
+        self.image: io.BytesIO | None = p.image
         self.public_image: str = p.public_image
         self.author: str = p.author
         self.description: io.TextIOBase = p.description

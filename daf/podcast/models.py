@@ -97,7 +97,7 @@ class Podcast(PodcastBaseModel):
         return self.abs_url(self.image.url) if self.image else self.public_image
 
 
-def podcast_directory_path(episode: 'Episode', filename: str) -> str:
+def podcast_directory_path(episode: Episode, filename: str) -> str:
     return f'episodes/{episode.podcast.slug}/{filename}'
 
 
@@ -112,13 +112,13 @@ class Episode(PodcastBaseModel):
     def __str__(self) -> str:
         return f'{self.podcast.title} - {self.title}'
 
+    def get_absolute_url(self) -> str:
+        return self.audio.url
+
     def clean_files(self) -> None:
         super().clean_files()
         if self.audio:
             os.remove(self.audio.path)
-
-    def get_absolute_url(self) -> str:
-        return self.audio.url
 
     @property
     def pub_date(self) -> str:

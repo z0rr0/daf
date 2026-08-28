@@ -6,7 +6,6 @@ readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "django>=6.1",
-    "flake8>=7.3.0",
     "markdown>=3.10.3",
     "pillow>=12.3.0",
     "requests>=2.34.2",
@@ -14,5 +13,17 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "flake8>=7.3.0",
+    "ruff>=0.16.5",
 ]
+
+[tool.ruff]
+target-version = "py314"
+line-length = 120
+extend-exclude = [
+    "daf/daf/local_settings.py",
+    "daf/daf/settings.py",
+    "daf/podcast/migrations",
+]
+
+[tool.ruff.lint]
+select = ["B", "DJ", "E", "F", "I", "UP", "W"]
