@@ -4,7 +4,13 @@ PORT=8002
 ADDR=127.0.0.1
 MANAGE=daf/manage.py
 PID=/tmp/.$(NAME).pid
-DOCKER_TAG=z0rr0/daf
+GIT_TAG=$(shell git tag | sort -V | tail -1 | grep . || echo "v0.0.0")
+TAG=$(patsubst v%,%,$(GIT_TAG))
+IMAGE=z0rr0/daf
+BUILDER=daf-multiarch
+DOCKER_PLATFORMS=linux/amd64,linux/arm64
+
+.PHONY: all lint test docker docker-push start stop restart
 
 all: test
 
@@ -16,10 +22,17 @@ test: lint
 	uv run $(MANAGE) test podcast
 
 docker: test
-	docker build -t $(DOCKER_TAG) .
+	docker buildx build \
+		-t $(IMAGE):latest -t $(IMAGE):$(TAG) \
+		--load .
 
-docker_linux_amd64: test
-	docker buildx build --platform linux/amd64 -t $(DOCKER_TAG) .
+docker-push: test
+	@test "$(GIT_TAG)" != "v0.0.0" || (echo "no git tag found, refusing to push $(IMAGE):0.0.0" && exit 1)
+	@docker buildx inspect $(BUILDER) >/dev/null 2>&1 || docker buildx create --name $(BUILDER) --driver docker-container
+	docker buildx build --builder $(BUILDER) \
+		--platform $(DOCKER_PLATFORMS) \
+		-t $(IMAGE):latest -t $(IMAGE):$(TAG) \
+		--push .
 
 start:
 	@echo "  >  $(NAME)"

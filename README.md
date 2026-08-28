@@ -17,11 +17,21 @@ python manage.py flush --no-input
 python manage.py createsuperuser
 ```
 
-2. Build docker container
+2. Build the Docker image for the host architecture:
 
 ```sh
 make docker
 ```
+
+To publish a release image for `linux/amd64` and `linux/arm64`, create a Git
+version tag and run:
+
+```sh
+make docker-push
+```
+
+Both `latest` and the version without its leading `v` are published. For
+example, Git tag `v1.2.1` produces Docker tags `latest` and `1.2.1`.
 
 3. Go to deploy host and prepare required files. Example of [uwsgi.ini](./uwsgi.ini). For `local_settings` required variables: `DATABASES`, `SECRET_KEY`, `DEBUG`, `ALLOWED_HOSTS`. 
 
@@ -60,4 +70,3 @@ read [documentation](https://uwsgi.readthedocs.io/en/latest/tutorials/Django_and
 
 This source code is governed by a MIT license that can be found
 in the [LICENSE](https://github.com/z0rr0/daf/blob/main/LICENSE) file.
-

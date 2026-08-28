@@ -15,7 +15,8 @@ make test        # lint, then run the full test suite (this is `make all`)
 make lint        # Ruff checks configured in pyproject.toml
 make start       # run dev server at 127.0.0.1:8002 (backgrounded, PID in /tmp/.daf.pid)
 make stop        # kill the dev server
-make docker      # run tests, then build the z0rr0/daf image
+make docker      # run tests, then build host-arch latest and version images
+make docker-push # run tests, then build and push linux/amd64 and linux/arm64 images
 ```
 
 Ruff targets Python 3.14 and enables `E`, `F`, `W`, `I`, `UP`, `B`, and `DJ` rules. Migrations and Django settings files are excluded. Run `uv run ruff check . --fix` to apply safe automatic fixes.
