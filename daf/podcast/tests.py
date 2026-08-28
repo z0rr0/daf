@@ -1,6 +1,6 @@
 import os
 from datetime import timedelta
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 from unittest import mock
 
 from django.core.files.base import ContentFile
@@ -137,7 +137,7 @@ class EpisodeUploadTestCase(PodcastBaseTestCase):
         self.assertIsNotNone(episode.published)
         episode.clean_files()
 
-    def _fail_upload(self, expected: Dict[str, Any], data: Optional[Dict[str, Any]] = None) -> None:
+    def _fail_upload(self, expected: dict[str, Any], data: Optional[dict[str, Any]] = None) -> None:
         podcast = self.podcasts[0]
         n = podcast.episode_set.count()
 

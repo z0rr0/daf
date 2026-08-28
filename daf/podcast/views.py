@@ -1,5 +1,6 @@
+from collections.abc import Iterable
 from datetime import datetime
-from typing import Any, Dict, Iterable, List
+from typing import Any
 
 from django.conf import settings
 from django.contrib.syndication.views import Feed
@@ -89,7 +90,7 @@ class EpisodesFeed(Feed):
     def feed_copyright(self, obj: Podcast) -> str:
         return obj.copyright
 
-    def feed_extra_kwargs(self, obj: Podcast) -> Dict[str, Any]:
+    def feed_extra_kwargs(self, obj: Podcast) -> dict[str, Any]:
         return {
             'image': obj.image_url,
             'keywords': obj.keywords,
@@ -123,7 +124,7 @@ class EpisodesFeed(Feed):
     def item_link(self, item: Episode) -> str:
         return item.get_absolute_url()
 
-    def item_enclosures(self, item: Episode) -> List[Enclosure]:
+    def item_enclosures(self, item: Episode) -> list[Enclosure]:
         return [Enclosure(
             url=getattr(item, 'audio_url', ''),
             length=str(getattr(item, 'audio_size', 0)),
@@ -136,7 +137,7 @@ class EpisodesFeed(Feed):
     def item_guid(self, item: Episode) -> str:
         return str(item.pk)
 
-    def item_extra_kwargs(self, item: Episode) -> Dict[str, Any]:
+    def item_extra_kwargs(self, item: Episode) -> dict[str, Any]:
         return {'image': getattr(item, 'image_url', '')}
 
 
