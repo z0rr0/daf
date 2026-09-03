@@ -4,7 +4,7 @@ This file provides guidance to coding agents when working with code in this repo
 
 ## Project
 
-**DAF (Django Audio Feed)** — a Django web app that turns uploaded audio files into custom iTunes-compatible RSS podcast feeds. Django 6.1, Python 3.14, dependencies managed with `uv` (`uv.lock`).
+**DAF (Django Audio Feed)** — a Django web app that turns uploaded audio files into custom iTunes-compatible RSS podcast feeds. Django 6.1, Python 3.14, dependencies managed with `uv` (`uv.lock`). There is no `requirements.txt`: the Docker build exports pinned runtime dependencies from `uv.lock` in a separate build stage.
 
 ## Commands
 
@@ -46,7 +46,7 @@ Single Django app (`daf/podcast/`) under a thin project config (`daf/daf/`). Two
 
 **URLs**: project `daf/urls.py` mounts the app at `/podcast/` and serves `MEDIA_URL` directly. App routes (`podcast/urls.py`): `<slug>/rss`, `<slug>/upload`, `custom/<uuid>`.
 
-**Clients** (`clients/`): standalone CLI scripts (`youtube.py`, `simple.py`), *not* part of the Django app. They shell out (e.g. `youtube.py` runs `yt-dlp`) and POST to the `upload` endpoint over HTTP. They have their own informal dependency lists in their docstrings.
+**Clients** (`clients/`): standalone CLI scripts (`youtube.py`, `simple.py`), *not* part of the Django app. They shell out (e.g. `youtube.py` runs `yt-dlp`) and POST to the `upload` endpoint over HTTP. They have their own informal dependency lists in their docstrings. Their Python dependencies (`markdown`, `requests`) live in the `clients` dependency group in `pyproject.toml`; it is installed locally by default via `tool.uv.default-groups` and excluded from the Docker image.
 
 ## Settings & secrets
 
