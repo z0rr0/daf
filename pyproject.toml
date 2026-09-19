@@ -11,7 +11,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "ruff>=0.16.6",
+    "ruff>=0.16.7",
 ]
 # Dependencies of the standalone CLI scripts in clients/, not of the Django app.
 # Installed locally by default (see tool.uv.default-groups), excluded from the Docker image.
