@@ -1,6 +1,6 @@
 [project]
 name = "daf"
-version = "1.2.4"
+version = "1.2.5"
 description = "Django Audio Feed is a simple web application that allows to create custom RSS podcast feeds."
 readme = "README.md"
 requires-python = ">=3.14"
@@ -11,7 +11,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "ruff>=0.16.6",
+    "ruff>=0.16.8",
 ]
 # Dependencies of the standalone CLI scripts in clients/, not of the Django app.
 # Installed locally by default (see tool.uv.default-groups), excluded from the Docker image.
