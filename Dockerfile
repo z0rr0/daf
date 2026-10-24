@@ -1,6 +1,6 @@
 # Export pinned runtime dependencies from uv.lock (no dev/clients groups, no project itself).
 # Runs on the build platform: the export is architecture-independent, no need for QEMU.
-FROM --platform=$BUILDPLATFORM ghcr.io/astral-sh/uv:0.12.9-alpine AS deps
+FROM --platform=$BUILDPLATFORM ghcr.io/astral-sh/uv:0.13.5-alpine AS deps
 WORKDIR /src
 COPY pyproject.toml uv.lock ./
 RUN uv export --frozen --no-default-groups --no-emit-project -o requirements.txt
