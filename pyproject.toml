@@ -5,7 +5,7 @@ description = "Django Audio Feed is a simple web application that allows to crea
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
-    "django>=6.1.2",
+    "django>=6.1.3",
     "pillow>=13.0.0",
 ]
 
